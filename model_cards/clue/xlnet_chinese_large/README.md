@@ -2,12 +2,12 @@
 language: zh
 ---
 
-## albert_chinese_tiny
+## xlnet_chinese_large
 
 ### Overview
 
-**Language model:** albert-tiny
-**Model size:** 16M
+**Language model:** xlnet-large
+**Model size:** 1.3G
 **Language:** Chinese
 **Training data:** [CLUECorpusSmall](https://github.com/CLUEbenchmark/CLUECorpus2020)
 **Eval data:** [CLUE dataset](https://github.com/CLUEbenchmark/CLUE)
@@ -18,13 +18,11 @@ For results on downstream tasks like text classification, please refer to [this 
 
 ### Usage
 
-**NOTE:**Since sentencepiece is not used in `albert_chinese_tiny` model, you have to call **BertTokenizer** instead of AlbertTokenizer !!!
-
 ```
 import torch
-from transformers import BertTokenizer, AlbertModel
-tokenizer = BertTokenizer.from_pretrained("clue/albert_chinese_tiny")
-albert = AlbertModel.from_pretrained("clue/albert_chinese_tiny")
+from transformers import XLNetTokenizer,XLNetModel
+tokenizer = XLNetTokenizer.from_pretrained("clue/xlnet_chinese_large")
+xlnet = XLNetModel.from_pretrained("clue/xlnet_chinese_large")
 ```
 
 ### About CLUE benchmark

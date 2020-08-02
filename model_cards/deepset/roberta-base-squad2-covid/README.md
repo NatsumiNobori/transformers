@@ -1,39 +1,39 @@
----
-datasets:
-- squad_v2
----
-
-# roberta-base for QA 
+# roberta-base-squad2 for QA on COVID-19
 
 ## Overview
-**Language model:** roberta-base  
+**Language model:** deepset/roberta-base-squad2  
 **Language:** English  
 **Downstream-task:** Extractive QA  
-**Training data:** SQuAD 2.0  
-**Eval data:** SQuAD 2.0  
-**Code:**  See [example](https://github.com/deepset-ai/FARM/blob/master/examples/question_answering.py) in [FARM](https://github.com/deepset-ai/FARM/blob/master/examples/question_answering.py)  
-**Infrastructure**: 4x Tesla v100
+**Training data:** [SQuAD-style CORD-19 annotations from 23rd April](https://github.com/deepset-ai/COVID-QA/blob/master/data/question-answering/200423_covidQA.json)  
+**Code:**  See [example](https://github.com/deepset-ai/FARM/blob/master/examples/question_answering_crossvalidation.py) in [FARM](https://github.com/deepset-ai/FARM)  
+**Infrastructure**: Tesla v100
 
 ## Hyperparameters
-
 ```
-batch_size = 50
+batch_size = 24
 n_epochs = 3
-base_LM_model = "roberta-base"
+base_LM_model = "deepset/roberta-base-squad2"
 max_seq_len = 384
 learning_rate = 3e-5
 lr_schedule = LinearWarmup
-warmup_proportion = 0.2
-doc_stride=128
-max_query_length=64
-``` 
+warmup_proportion = 0.1
+doc_stride = 128
+xval_folds = 5
+dev_split = 0
+no_ans_boost = -100
+```
 
 ## Performance
-Evaluated on the SQuAD 2.0 dev set with the [official eval script](https://worksheets.codalab.org/rest/bundles/0x6b567e1cf2e041ec80d7098f031c5c9e/contents/blob/).
-```
-"exact": 78.49743114629833,
-"f1": 81.73092721240889
-```
+5-fold cross-validation on the data set led to the following results:  
+
+**Single EM-Scores:**   [0.222, 0.123, 0.234, 0.159, 0.158]  
+**Single F1-Scores:**   [0.476, 0.493, 0.599, 0.461, 0.465]  
+**Single top\_3\_recall Scores:**   [0.827, 0.776, 0.860, 0.771, 0.777]  
+**XVAL EM:**   0.17890995260663506  
+**XVAL f1:**   0.49925444207319924  
+**XVAL top\_3\_recall:**   0.8021327014218009
+
+This model is the model obtained from the **third** fold of the cross-validation.
 
 ## Usage
 
@@ -43,7 +43,7 @@ from transformers.pipelines import pipeline
 from transformers.modeling_auto import AutoModelForQuestionAnswering
 from transformers.tokenization_auto import AutoTokenizer
 
-model_name = "deepset/roberta-base-squad2"
+model_name = "deepset/roberta-base-squad2-covid"
 
 # a) Get predictions
 nlp = pipeline('question-answering', model=model_name, tokenizer=model_name)
@@ -59,13 +59,12 @@ tokenizer = AutoTokenizer.from_pretrained(model_name)
 ```
 
 ### In FARM
-
 ```python
 from farm.modeling.adaptive_model import AdaptiveModel
 from farm.modeling.tokenization import Tokenizer
 from farm.infer import Inferencer
 
-model_name = "deepset/roberta-base-squad2"
+model_name = "deepset/roberta-base-squad2-covid"
 
 # a) Get predictions
 nlp = Inferencer.load(model_name, task_type="question_answering")
@@ -81,17 +80,17 @@ tokenizer = Tokenizer.load(model_name)
 ### In haystack
 For doing QA at scale (i.e. many docs instead of single paragraph), you can load the model also in [haystack](https://github.com/deepset-ai/haystack/):
 ```python
-reader = FARMReader(model_name_or_path="deepset/roberta-base-squad2")
+reader = FARMReader(model_name_or_path="deepset/roberta-base-squad2-covid")
 # or 
-reader = TransformersReader(model="deepset/roberta-base-squad2",tokenizer="deepset/roberta-base-squad2")
+reader = TransformersReader(model="deepset/roberta-base-squad2",tokenizer="deepset/roberta-base-squad2-covid")
 ```
 
-
 ## Authors
-Branden Chan: `branden.chan [at] deepset.ai`
-Timo Möller: `timo.moeller [at] deepset.ai`
-Malte Pietsch: `malte.pietsch [at] deepset.ai`
-Tanay Soni: `tanay.soni [at] deepset.ai`
+Branden Chan: `branden.chan [at] deepset.ai`  
+Timo Möller: `timo.moeller [at] deepset.ai`  
+Malte Pietsch: `malte.pietsch [at] deepset.ai`  
+Tanay Soni: `tanay.soni [at] deepset.ai`  
+Bogdan Kostić: `bogdan.kostic [at] deepset.ai`  
 
 ## About us
 ![deepset logo](https://raw.githubusercontent.com/deepset-ai/FARM/master/docs/img/deepset_logo.png)
@@ -106,4 +105,3 @@ Some of our work:
 
 Get in touch:
 [Twitter](https://twitter.com/deepset_ai) | [LinkedIn](https://www.linkedin.com/company/deepset-ai/) | [Website](https://deepset.ai)
-
